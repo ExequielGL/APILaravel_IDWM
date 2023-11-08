@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
 {
@@ -28,9 +30,29 @@ class AppointmentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreAppointmentRequest $request)
+    public function store(Request $request)
     {
-        //
+        try{
+            DB::beginTransaction();
+            $fields=$request->validate([
+                'name'=>'required',
+                'date'=>'nullable',
+                'symptoms'=>'nullable',
+                'user_id'=>'required'
+            ]);
+
+            $appointment=Appointment::create([
+                'name'=>$fields['name'],
+                'date'=>$fields['date'],
+                'symptoms'=>$fields['symptoms'],
+                'user_id'=>$fields['user_id']
+            ]);
+            DB::commit();
+            return response()->json($appointment,200);
+        }catch (Exception $e){
+            DB::rollBack();
+            throw new \Exception($e->getMessage());
+        }
     }
 
     /**
@@ -38,7 +60,12 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        //
+        try{
+            return response()->json($appointment,200);
+
+        }catch (\Exception $exception){
+            throw new \Exception($exception->getMessage());
+        }
     }
 
     /**
@@ -52,9 +79,24 @@ class AppointmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateAppointmentRequest $request, Appointment $appointment)
+    public function update(Request $request, Appointment $appointment)
     {
-        //
+        try {
+            DB::beginTransaction();
+            $fields = $request->validate([
+                'name' => 'nullable',
+                'date' => 'nullable',
+                'symptoms' => 'nullable',
+                'user_id' => 'nullable',
+            ]);
+
+            $appointment->update($request->only(['name','date','symptoms','user_id']));
+            DB::commit();
+            return response()->json($appointment, 200);
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            throw new \Exception($exception->getMessage());
+        }
     }
 
     /**
@@ -62,6 +104,14 @@ class AppointmentController extends Controller
      */
     public function destroy(Appointment $appointment)
     {
-        //
+        try{
+            DB::beginTransaction();
+            $appointment->delete();
+            DB::commit();
+            return response()->json('Deleted success',200);
+        }catch (\Exception $exception){
+            DB::rollBack();
+            throw new \Exception($exception->getMessage());
+        }
     }
 }
