@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('symptoms')->nullable();
-            $table->string('date')->nullable();
+            $table->string('date');
             $table->foreignId('user_id');
             $table->timestamps();
         });

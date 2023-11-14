@@ -38,7 +38,7 @@ class AppointmentController extends Controller
                 'name'=>'required',
                 'date'=>'nullable',
                 'symptoms'=>'nullable',
-                'user_id'=>'required'
+                'user_id'=>'required|integer'
             ]);
 
             $appointment=Appointment::create([
